@@ -8,7 +8,6 @@ install_requires = [
 ]
 
 setup_requires = [
-    'pytest-runner',
     'setuptools >= 30'
 ]
 
