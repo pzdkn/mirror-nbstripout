@@ -27,13 +27,12 @@ def test_cells(orig_nb):
     nb_stripped = strip_output(nb_stripped, None, None)
     for i, cell in enumerate(nb_stripped.cells):
         if cell.cell_type == 'code' and cell.source:
-            match = re.match(r"\s*#\s*(output|no_output)", cell.source)
-            if match:
+            if match := re.match(r"\s*#\s*(output|no_output)", cell.source):
                 # original cell should have had output.
                 # If not, there's a problem with the test fixture
                 assert orig_nb.cells[i].outputs
 
-                if match.group(1) == 'output':
+                if match[1] == 'output':
                     assert len(cell.outputs) > 0
                 else:
                     assert len(cell.outputs) == 0

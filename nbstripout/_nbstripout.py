@@ -170,7 +170,10 @@ def _get_system_gitconfig_folder():
     except CalledProcessError as e:
         git_config_output = e.output
 
-        system_gitconfig_file_path = re.match(r"fatal:.*file '([^']+)'.*", git_config_output).group(1)
+        system_gitconfig_file_path = re.match(
+            r"fatal:.*file '([^']+)'.*", git_config_output
+        )[1]
+
 
     return path.abspath(path.dirname(system_gitconfig_file_path))
 
@@ -220,7 +223,7 @@ def install(git_config, install_location=INSTALL_LOCATION_LOCAL, attrfile=None):
         filepath = f'"{PureWindowsPath(sys.executable).as_posix()}" -m nbstripout'
         check_call(git_config + ['filter.nbstripout.clean', filepath])
         check_call(git_config + ['filter.nbstripout.smudge', 'cat'])
-        check_call(git_config + ['diff.ipynb.textconv', filepath + ' -t'])
+        check_call(git_config + ['diff.ipynb.textconv', f'{filepath} -t'])
         attrfile = _get_attrfile(git_config, install_location, attrfile)
     except FileNotFoundError:
         print('Installation failed: git is not on path!', file=sys.stderr)

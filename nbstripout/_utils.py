@@ -35,13 +35,11 @@ def _cells(nb, conditionals):
         for ws in nb.worksheets:
             for conditional in conditionals:
                 ws.cells = list(filter(conditional, ws.cells))
-            for cell in ws.cells:
-                yield cell
+            yield from ws.cells
     else:
         for conditional in conditionals:
             nb.cells = list(filter(conditional, nb.cells))
-        for cell in nb.cells:
-            yield cell
+        yield from nb.cells
 
 
 def get_size(item):
@@ -83,8 +81,7 @@ def determine_keep_output(cell, default, strip_init_cells=False):
 
 
 def _zeppelin_cells(nb):
-    for pg in nb['paragraphs']:
-        yield pg
+    yield from nb['paragraphs']
 
 
 def strip_zeppelin_output(nb):
@@ -121,8 +118,10 @@ def strip_output(nb, keep_output, keep_count, extra_keys=[], drop_empty_cells=Fa
     # Keep cells if they have any `source` line that contains non-whitespace
     if drop_empty_cells:
         conditionals.append(lambda c: any(line.strip() for line in c.get('source', [])))
-    for tag_to_drop in drop_tagged_cells:
-        conditionals.append(lambda c: tag_to_drop not in c.get("metadata", {}).get("tags", []))
+    conditionals.extend(
+        lambda c: tag_to_drop not in c.get("metadata", {}).get("tags", [])
+        for tag_to_drop in drop_tagged_cells
+    )
 
     for cell in _cells(nb, conditionals):
         keep_output_this_cell = determine_keep_output(cell, keep_output, strip_init_cells)
